@@ -220,6 +220,7 @@
         async defer></script>
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="markerclusterer_compiled.js"></script>		
 	<script>
 	var sitemap;
 			function componentToHex(c) {
@@ -250,39 +251,13 @@
 				  var myLatLng = {lat: 14.655663, lng: 121.0607978};
 				  var bounds = new google.maps.LatLngBounds();
 
-					  var map = new google.maps.Map(document.getElementById('mapContainer'), {
+					  map = new google.maps.Map(document.getElementById('mapContainer'), {
 					    zoom: 10,
 					    center: myLatLng
 					  });
-
-					  /*var sitemap = {
-						     Site1: {
-						    center: {lat: 14.7212398, lng: 121.0400891},
-						    population: 758,
-						    site_name: "G2860QCNVMGMR1"
-						     },
-						     Site2: {
-						    center: {lat: 14.7343719, lng: 121.0572338},
-						    population: 574,
-						    site_name: "108ZZZBARTGFE1"
-						     },
-						     Site3: {
-						    center: {lat: 14.4649923, lng: 121.0180306},
-						    population: 698,
-						    site_name: "P25ZZSMTPQGMR1"
-						     },
-						     Site4: {
-						    center: {lat: 14.6849978, lng: 121.0954285},
-						    population: 338,
-						    site_name: "211ZZFLVS1GMR1"
-						     },
-						     Site5: {
-						    center: {lat: 14.7362494, lng: 121.0559678},
-						    population: 300,
-						    site_name: "E91ZZROBFVGMR1"
-						     }
-				  		 };*/
+					  
 				  function setPoints(){
+					var markers = [];
 				  	for (var site in sitemap) {
 
 			        console.log(sitemap[site]);
@@ -304,7 +279,9 @@
 
 					   var marker = new google.maps.Marker({
 					    position: {lat: sitemap[site].position.latitude, lng: sitemap[site].position.longitude},
-					    title: sitemap[site].site_name,
+					    title: 'Site Name: '+ sitemap[site].site_name,
+						content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
+								sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
 					    icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/blue_dot.png"
 					   });
 					   	
@@ -312,21 +289,23 @@
 						
 					   google.maps.event.addListener(marker, 'click', (function(marker, i) {
 						    return function() {
-						      	map.setZoom(13);
+						      	map.setZoom(16);
 					    		map.setCenter(marker.getPosition());
 					    
-					    		var contentString = 
-					   			'<b>Site Name: '+ marker.title +'</b>';
+					    		var contentString = marker.title + '<br/>' + marker.content;
 				  				var infowindow = new google.maps.InfoWindow({
 										    content: contentString
 										  });
 				  				infowindow.open(map, marker);
 						    }
 						  })(marker, site));
-					   marker.setMap(map);
+					   //marker.setMap(map);
+					   markers.push(marker);
 				    }
+					var mcOptions = {gridSize: 50, maxZoom: 15};
+					var markerCluster = new MarkerClusterer(map, markers, mcOptions);
 				  }
-				  
+				 			  
 				}
 	</script>
 </body>	
