@@ -38,19 +38,29 @@ router.get('/', function(req, res) {
 // more routes for our API will happen here
 // ----------------------------------------------------
 
-var query = site.find();
+var query = site.find()
+    .select('_id site_name site_id operator software_release technology site_type controller_id position operating_bands site_layouts');
 
 router.route('/sites')
-
-    // get the bear with that id (accessed at GET http://localhost:8080/api/bears/:bear_id)
     .get(function(req, res) {
         query.exec(function(err, sites) {
-        console.log('getting');
+        console.log('getting all sites');
             if (err){
                 console.log('error');
                 res.send(err);
             }
             res.json(sites);
+            console.log('Done');
+        });
+    });
+
+router.route('/sites/:_id')
+    .get(function(req, res) {
+        site.findById(req.params._id, function(err, siteInfo) {
+        console.log('getting site with id ',req.params._id);
+            if (err)
+                res.send(err);
+            res.json(siteInfo);
             console.log('Done');
         });
     });
