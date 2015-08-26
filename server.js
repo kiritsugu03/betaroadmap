@@ -26,7 +26,7 @@ var router = express.Router();              // get an instance of the express Ro
 // middleware to use for all requests
 router.use(function(req, res, next) {
     // do logging
-    console.log('Something is happening.');
+    console.log('Something is happening.'); 
     next(); // make sure we go to the next routes and don't stop here
 });
 
@@ -38,19 +38,44 @@ router.get('/', function(req, res) {
 // more routes for our API will happen here
 // ----------------------------------------------------
 
-var query = site.find();
-
 router.route('/sites')
-
-    // get the bear with that id (accessed at GET http://localhost:8080/api/bears/:bear_id)
     .get(function(req, res) {
+        var query = site.find().select('_id position operator site_name site_type technology');
         query.exec(function(err, sites) {
-        console.log('getting');
+        console.log('getting all sites');
             if (err){
                 console.log('error');
                 res.send(err);
             }
             res.json(sites);
+            console.log('Done');
+        });
+    });
+
+router.route('/sites/:from/:limit')
+    .get(function(req, res) {
+        var query = site.find()
+            .select('_id site_name site_id operator software_release technology position site_type controller_id operating_bands site_layouts')
+            .limit(req.params.limit)
+            .skip(req.params.from);
+        query.exec(function(err, sites) {
+        console.log('getting ', req.params.limit, ' sites');
+            if (err){
+                console.log('error');
+                res.send(err);
+            }
+            res.json(sites);
+            console.log('Done');
+        });
+    });
+
+router.route('/sites/:_id')
+    .get(function(req, res) {
+        site.findById(req.params._id, function(err, siteInfo) {
+        console.log('getting site with id ',req.params._id);
+            if (err)
+                res.send(err);
+            res.json(siteInfo);
             console.log('Done');
         });
     });

@@ -9,325 +9,365 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 	<!-- Optional theme -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-
+	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="js/markerclusterer_compiled.js"></script>
 	<style type="text/css">
 	/*custom CSS here*/
-	.navbar-text
-	{
-		margin-left: 0px;
+	html, body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
 	}
-	body 
-	{ 
-		padding-top: 70px; 
+	#map {
+		height: 100%;
 	}
-	.panel-body
-	{
-		height: 400px;
+	.controls {
+		margin-top: 10px;
+		border: 1px solid transparent;
+		border-radius: 2px 0 0 2px;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		height: 32px;
+		outline: none;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 	}
-	.panel-heading
-	{
-		text-align: center;
-	}
-	#toolPics
-	{
-		height: 200px;
-		width: 200px;
-	}
-	.content
-	{
-		font-family: Arial;
+	#pac-input {
+		background-color: #fff;
+		font-family: Roboto;
 		font-size: 15px;
-		font-weight: bold;
+		font-weight: 300;
+		margin-left: 12px;
+		padding: 0 11px 0 13px;
+		text-overflow: ellipsis;
+		width: 300px;
+	}
+	#pac-input:focus {
+	  border-color: #4d90fe;
+	}
+	.pac-container {
+	  font-family: Roboto;
+	}
+	#type-selector {
+	  color: #fff;
+	  background-color: #4d90fe;
+	  padding: 5px 11px 0px 11px;
+	}
+	#type-selector label {
+	  font-family: Roboto;
+	  font-size: 13px;
+	  font-weight: 300;
+	}
+	#table-data {
+		background-color: white;
+		border-radius: 10px;
+		position: absolute;
+		bottom: 0;
+	    width: 100%;
+	    height: 100px;
+	    z-index: 1;
+	    -webkit-transition: width 2s; /* For Safari 3.1 to 6.0 */
+	    transition: height 3s;
+	}
+	#table-data:hover {
+	    height: 400px;
 	}
 	</style>
 </head>
 
+<body>
+	<input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
 
-<body id="bod">
-	<nav class="navbar navbar-default navbar-fixed-top">
-		<div class="container">
-				<span><h3 class="navbar-text">Roadmap</h3></span>
-			<form class="navbar-form navbar-right" role="search">
-				  <div class="form-group">
-				    <input type="text" class="form-control" placeholder="Search">
-				  </div>
-				  <button type="button" class="btn btn-default btn-md">
-					  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-				</button>
-			</form>
-		</div>
-	</nav>
-
-	<div class="container">
-		  <div class="row">
-				<div class="col-lg-9">
-					<div class="panel panel-body" id="mapContainer">
-						<script type="text/javascript">
-
-					   	
-					    </script>
-					</div>
-				</div>
-				<div class="col-lg-3">
-					<div class="thumbnail">
-				      <img id="toolPics" src="Google-Maps-icon.png" alt="...">
-				      <div class="caption">
-				        <h4>Google Maps</h4>
-				        <p>Provides directions, interactive maps, and satellite/aerial imagery of many countries. Can also search by keyword such as type of business.</p>
-				        <p><a href="#" class="btn btn-primary" role="button">Learn more</a></p>
-				      </div>
-				    </div>
-				</div>
-		</div>
-	</div>
-	<div class="container">
-	  <table class="table">
-	   <thead>
-	    <tr>
-	     <th>oid</th>
-	     <th>site name</th>
-	     <th>site id</th>
-	     <th>operator</th>
-	     <th>software release</th>
-	     <th>technology</th>
-	     <th>site type</th>
-	     <th>controller id</th>
-	     <th>operating bands</th>
-	     <th>site layouts</th>
-	    </tr>
-	   </thead>
-	   <tbody id="tableBody">
-	   </tbody>
-	  </table>
+	<div id="table-data" class="container on-top" style="overflow-y: auto">
+		<select id="pages">
+		</select>
+		<a href="javascript:void(0)" onClick="requestNext()">
+			NEXT
+		</a>
+		<a href="javascript:void(0)" onClick="requestBack()">
+			BACK
+		</a>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>site name</th>
+					<th>site id</th>
+					<th>operator</th>
+					<th>software release</th>
+					<th>technology</th>
+					<th>site type</th>
+					<th>controller id</th>
+					<th>operating bands</th>
+					<th>site layouts</th>
+				</tr>
+			</thead>
+			<tbody class="table" id="tableBody">
+			</tbody>
+		</table>
+	<button type="button" class="btn btn-default btn-md">
+		<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+	</button>
+	<button type="button" class="btn btn-default btn-md">
+		<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+	</button>
  	</div>
- 	<script>
-	function loadTable() {
-	    var data = {
-	        Site1: {
-	            oid: "5580494844ef0e3b4caa1885",
-	            site_name : "G2860QCNVMGMR1",
-	            site_id : "BCF-60",
-	            operator : "Smart (Philippines)",
-	            software_release : "S15",
-	            technology : "GSM",
-	            site_type : "Flexi Multiradio",
-	            controller_id : "BSC-388789",
-	            operating_bands : "1800",
-	            site_layouts : "3"
-	        },
-	        Site2: {
-	            oid: "5580494844ef0e3b4caa1885",
-	            site_name : "108ZZZBARTGFE1",
-	            site_id : "BCF-39",
-	            operator : "Smart (Philippines)",
-	            software_release : "S15",
-	            technology : "GSM",
-	            site_type : "Flexi EDGE",
-	            controller_id : "BSC-388789",
-	            operating_bands : "1800",
-	            site_layouts : "3"
-	        },
-	        Site3: {
-	            oid: "5580494844ef0e3b4caa1885",
-	            site_name : "P25ZZSMTPQGMR1",
-	            site_id : "BCF-17",
-	            operator : "Smart (Philippines)",
-	            software_release : "S15",
-	            technology : "GSM",
-	            site_type : "Flexi Multiradio",
-	            controller_id : "BSC-239095",
-	            operating_bands : "900",
-	            site_layouts : "4+4+4"
-	        },
-	        Site4: {
-	            oid: "5580494844ef0e3b4caa1885",
-	            site_name : "211ZZFLVS1GMR1",
-	            site_id : "BCF-17",
-	            operator : "Smart (Philippines)",
-	            software_release : "S15",
-	            technology : "GSM",
-	            site_type : "Flexi Multiradio",
-	            controller_id : "BSC-238616",
-	            operating_bands : "900",
-	            site_layouts : "4+4+4"
-	        },
-	        Site5: {
-	            oid: "5580494844ef0e3b4caa1885",
-	            site_name : "E91ZZROBFVGMR1",
-	            site_id : "BCF-57",
-	            operator : "Smart (Philippines)",
-	            software_release : "S15",
-	            technology : "GSM",
-	            site_type : "Flexi Multiradio",
-	            controller_id : "BSC-238616",
-	            operating_bands : "1800",
-	            site_layouts : "3"
-	        }
-	    }
+	<script src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initMap" async defer></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="js/markerclusterer_compiled.js"></script>		
+	<script>
+	var sitemap;
+	var map;
+	var siteCount;
+	var from = 0;
+	var limit = 10;
 
+	function initMap() {
+		$.ajax({
+			type: "GET",
+			url: 'http://localhost:8080/api/sites',
+			dataType: 'json',
+			success: function(data) {
+				sitemap = data;
+			    siteCount = sitemap.length;
+				setPoints();
+				requestData(0);
+				loadPages();
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+			    alert('error ' + textStatus + " " + errorThrown);
+			}
+		});
+		var myLatLng = {lat: 14.655663, lng: 121.0607978};
+		var bounds = new google.maps.LatLngBounds();
+
+		map = new google.maps.Map(document.getElementById('map'), {
+			center: myLatLng,
+			zoom: 13,
+			mapTypeId: google.maps.MapTypeId.ROADMAP,
+			mapTypeControl: true,
+			mapTypeControlOptions: {
+			    style: google.maps.MapTypeControlStyle.TOP_RIGHT,
+			    position: google.maps.ControlPosition.TOP_RIGHT
+			},
+			zoomControl: true,
+			    zoomControlOptions: {
+			        style: google.maps.ZoomControlStyle.LARGE,
+			        position: google.maps.ControlPosition.RIGHT_CENTER
+			    },
+			panControl: true,
+			panControlOptions: {
+			        style: google.maps.ZoomControlStyle.LARGE,
+			        position: google.maps.ControlPosition.RIGHT_CENTER
+			    },
+			scaleControl: true,
+			streetViewControl: true,
+			streetViewControlOptions: {
+			    position: google.maps.ControlPosition.LEFT_TOP
+			},
+			streetViewControl:false
+		});
+		// Create the search box and link it to the UI element.
+		var input = document.getElementById('pac-input');
+		var searchBox = new google.maps.places.SearchBox(input);
+		map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+		// Bias the SearchBox results towards current map's viewport.
+		map.addListener('bounds_changed', function() {
+			searchBox.setBounds(map.getBounds());
+		});
+
+		var markers = [];
+		// [START region_getplaces]
+		// Listen for the event fired when the user selects a prediction and retrieve
+		// more details for that place.
+		searchBox.addListener('places_changed', function() {
+			var places = searchBox.getPlaces();
+
+			if (places.length == 0) {
+				return;
+			}
+
+			// Clear out the old markers.
+			markers.forEach(function(marker) {
+				marker.setMap(null);
+			});
+			markers = [];
+
+			// For each place, get the icon, name and location.
+			var bounds = new google.maps.LatLngBounds();
+			places.forEach(function(place) {
+				var icon = {
+				url: place.icon,
+				size: new google.maps.Size(71, 71),
+				origin: new google.maps.Point(0, 0),
+				anchor: new google.maps.Point(17, 34),
+				scaledSize: new google.maps.Size(25, 25)
+				};
+
+				// Create a marker for each place.
+				markers.push(new google.maps.Marker({
+					map: map,
+					icon: icon,
+					title: place.name,
+					position: place.geometry.location
+				}));
+
+				if (place.geometry.viewport) {
+					// Only geocodes have viewport.
+					bounds.union(place.geometry.viewport);
+				} else {
+					bounds.extend(place.geometry.location);
+				}
+			});
+			map.fitBounds(bounds);
+		});
+		// [END region_getplaces]
+	}
+	function setPoints() {
+		var markers = [];
+		for (var site in sitemap) {
+
+			var marker = new google.maps.Marker({
+				position: {
+					lat: sitemap[site].position.latitude,
+					lng: sitemap[site].position.longitude
+				},
+				title: 'Site Name: '+ sitemap[site].site_name,
+				content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
+				sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
+				icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/blue_dot.png"
+			});
+
+			var bounds = new google.maps.LatLngBounds();
+			bounds.extend(marker.position);
+
+			google.maps.event.addListener(marker, 'click', (function(marker, i) {
+				return function() {
+				  	map.setZoom(18);
+					map.setCenter(marker.getPosition());
+
+					var contentString = marker.title + '<br/>' + marker.content;
+					var infowindow = new google.maps.InfoWindow({
+						content: contentString
+					});
+					infowindow.open(map, marker);
+				}
+			})(marker, site));
+			markers.push(marker);
+		} 
+		var mcOptions = {gridSize: 50, maxZoom: 15};
+		var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+	}
+
+	function requestData(from)
+	{
+		$.ajax({
+			type: "GET",
+			url: 'http://localhost:8080/api/sites/' + from + '/' + limit,
+			dataType: 'json',
+	        success: function(data) {
+		    	sitemap = data;
+				loadTable();
+				document.getElementById("pages").value = (from/10)+1;
+	        },
+	        error: function(jqXHR, textStatus, errorThrown) {
+	            alert('error ' + textStatus + " " + errorThrown);
+	        }
+		});
+	}
+
+
+	function loadTable() {
 	    var tableBody = document.getElementById("tableBody");
+		while (tableBody.firstChild) {
+		    tableBody.removeChild(tableBody.firstChild);
+		}
 	    var tr = document.createElement("tr");
 	    var td = document.createElement("td");
 	    
-	    for (var siteData in data) {
+	    for (var siteData in sitemap) {
 	        var tr = document.createElement("tr");
-	        var td1 = document.createElement("td");
-	        td1.appendChild(document.createTextNode(data[siteData].oid));
-	        tr.appendChild(td1);
+	        var a = document.createElement("a");
+	        a.setAttribute('onclick', 'updateMapCenter(' + sitemap[siteData].position.latitude  + ', ' + sitemap[siteData].position.longitude +')');
+	        a.setAttribute('href', '#');
 	        var td2 = document.createElement("td");
-	        td2.appendChild(document.createTextNode(data[siteData].site_name));
-	        tr.appendChild(td2);
+	        td2.appendChild(document.createTextNode(sitemap[siteData].site_name));
+	        a.appendChild(td2);
+	        tr.appendChild(a);
 	        var td3 = document.createElement("td");
-	        td3.appendChild(document.createTextNode(data[siteData].site_id));
+	        td3.appendChild(document.createTextNode(sitemap[siteData].site_id));
 	        tr.appendChild(td3);
 	        var td4 = document.createElement("td");
-	        td4.appendChild(document.createTextNode(data[siteData].operator));
+	        td4.appendChild(document.createTextNode(sitemap[siteData].operator));
 	        tr.appendChild(td4);
 	        var td5 = document.createElement("td");
-	        td5.appendChild(document.createTextNode(data[siteData].software_release));
+	        td5.appendChild(document.createTextNode(sitemap[siteData].software_release));
 	        tr.appendChild(td5);
 	        var td6 = document.createElement("td");
-	        td6.appendChild(document.createTextNode(data[siteData].technology));
+	        td6.appendChild(document.createTextNode(sitemap[siteData].technology));
 	        tr.appendChild(td6);
 	        var td7 = document.createElement("td");
-	        td7.appendChild(document.createTextNode(data[siteData].site_type));
+	        td7.appendChild(document.createTextNode(sitemap[siteData].site_type));
 	        tr.appendChild(td7);
 	        var td8 = document.createElement("td");
-	        td8.appendChild(document.createTextNode(data[siteData].controller_id));
+	        td8.appendChild(document.createTextNode(sitemap[siteData].controller_id));
 	        tr.appendChild(td8);
 	        var td9 = document.createElement("td");
-	        td9.appendChild(document.createTextNode(data[siteData].operating_bands));
+	        td9.appendChild(document.createTextNode(sitemap[siteData].operating_bands));
 	        tr.appendChild(td9);
 	        var td10 = document.createElement("td");
-	        td10.appendChild(document.createTextNode(data[siteData].site_layouts));
+	        td10.appendChild(document.createTextNode(sitemap[siteData].site_layouts));
 	        tr.appendChild(td10);
 	        tableBody.appendChild(tr);
 	    }
 	}
- 	</script>
- 	<script>loadTable();</script>
-	<footer id="footer">
-		<div class="container">
-			<hr>
-			<p><small><a href="#">Like me</a> On facebook</small></p>
-			<p>	<small><a href="#">Ask whatever</a> On Twitter</small></p>
-			<p>	<small><a href="#">Subscribe me</a> On Youtube</small></p>
-		</div> <!-- end container -->
-	</footer> 
-		
-	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maps.googleapis.com/maps/api/js?callback=initMap"
-        async defer></script>
-	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-	<script>
-	var sitemap;
-			function componentToHex(c) {
-			    var hex = c.toString(16);
-			    return hex.length == 1 ? "0" + hex : hex;
-			}
 
-			function rgbToHex(r, g, b) {
-			    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-			}
-	    	var map;
-				function initMap() {
-					
-			    $.ajax({
-					type: "GET",
-					url: 'http://localhost:8080/api/sites',
-					dataType: 'json',
-			        success: function(data) {
-			            //$("#bod").append(data);
-			        	console.log(data);
-				    	sitemap = data;
-				    	setPoints();
-			        },
-			        error: function(jqXHR, textStatus, errorThrown) {
-			            alert('error ' + textStatus + " " + errorThrown);
-			        }
-				});
-				  var myLatLng = {lat: 14.655663, lng: 121.0607978};
-				  var bounds = new google.maps.LatLngBounds();
 
-					  var map = new google.maps.Map(document.getElementById('mapContainer'), {
-					    zoom: 10,
-					    center: myLatLng
-					  });
 
-					  /*var sitemap = {
-						     Site1: {
-						    center: {lat: 14.7212398, lng: 121.0400891},
-						    population: 758,
-						    site_name: "G2860QCNVMGMR1"
-						     },
-						     Site2: {
-						    center: {lat: 14.7343719, lng: 121.0572338},
-						    population: 574,
-						    site_name: "108ZZZBARTGFE1"
-						     },
-						     Site3: {
-						    center: {lat: 14.4649923, lng: 121.0180306},
-						    population: 698,
-						    site_name: "P25ZZSMTPQGMR1"
-						     },
-						     Site4: {
-						    center: {lat: 14.6849978, lng: 121.0954285},
-						    population: 338,
-						    site_name: "211ZZFLVS1GMR1"
-						     },
-						     Site5: {
-						    center: {lat: 14.7362494, lng: 121.0559678},
-						    population: 300,
-						    site_name: "E91ZZROBFVGMR1"
-						     }
-				  		 };*/
-				  function setPoints(){
-				  	for (var site in sitemap) {
+	function requestNext()
+	{
+		if(from < siteCount)
+		{
+			from = from + limit;
+			requestData(from);
+		}
+	}
 
-			        console.log(sitemap[site]);
-				  	/*var r = Math.round(Math.random()*255);
-		            var g = Math.round(Math.random()*255);
-		            var b = Math.round(Math.random()*255);*/
-				   // Add the circle for this city to the map.
-					   var cityCircle = new google.maps.Circle({
-					     strokeColor: '#00FF00',
-					     strokeOpacity: 0.8,
-					     strokeWeight: 2,
-					     fillColor: '#00FF00',
-					     fillOpacity: 0.35,
-					     map: map,
-					     center: {lat: sitemap[site].position.latitude, lng: sitemap[site].position.longitude},
-					     radius: Math.sqrt(sitemap[site].population) * 100,
-					     visible: true
-					   });
+	function requestBack()
+	{
+		if(from > 0)
+		{
+			from = from - limit;
+			requestData(from);
+		}
+	}
+	function loadPages()
+	{
+		var numPages = siteCount/limit;
+		var selectPages = document.getElementById("pages");
 
-					   var marker = new google.maps.Marker({
-					    position: {lat: sitemap[site].position.latitude, lng: sitemap[site].position.longitude},
-					    title: sitemap[site].site_name,
-					    icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/blue_dot.png"
-					   });
-					   	
-					   bounds.extend(marker.position);
-						
-					   google.maps.event.addListener(marker, 'click', (function(marker, i) {
-						    return function() {
-						      	map.setZoom(13);
-					    		map.setCenter(marker.getPosition());
-					    
-					    		var contentString = 
-					   			'<b>Site Name: '+ marker.title +'</b>';
-				  				var infowindow = new google.maps.InfoWindow({
-										    content: contentString
-										  });
-				  				infowindow.open(map, marker);
-						    }
-						  })(marker, site));
-					   marker.setMap(map);
-				    }
-				  }
-				  
-				}
+		while (selectPages.firstChild) {
+		    selectPages.removeChild(selectPages.firstChild);
+		}
+
+		for(var i = 1; i<numPages;i++)
+		{
+	    	var option = document.createElement("option");
+	    	option.setAttribute("value", i);
+	    	option.appendChild(document.createTextNode(i));
+	    	selectPages.appendChild(option);
+		}
+	}
+
+	document.getElementById("pages").onchange = function() {
+		from = (this.value - 1) * 10;
+		requestData(from);
+	}
+	
+	function updateMapCenter (latitude, longitude) {
+  		map.setCenter({lat:latitude, lng:longitude});
+  		map.setZoom(18);
+	} 
 	</script>
 </body>	
 </html>
