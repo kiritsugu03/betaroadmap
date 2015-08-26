@@ -79,10 +79,18 @@
     <div id="map"></div>
 
 	<div id="table-data" class="container on-top" style="overflow-y: auto">
+		<select id="pages">
+		</select>
+		<a href="javascript:void(0)" onClick="requestNext()">
+			NEXT
+		</a>
+		<a href="javascript:void(0)" onClick="requestBack()">
+			BACK
+		</a>
+
 		<table class="table">
 			<thead>
 				<tr>
-					<th>oid</th>
 					<th>site name</th>
 					<th>site id</th>
 					<th>operator</th>
@@ -107,17 +115,21 @@
 	<script>
 	var sitemap;
 	var map;
+	var siteCount;
+	var from = 0;
+	var limit = 10;
+
 	function initMap() {
 		$.ajax({
 			type: "GET",
 			url: 'http://localhost:8080/api/sites',
 			dataType: 'json',
 			success: function(data) {
-			    //$("#bod").append(data);
-				console.log(data);
 				sitemap = data;
+			    siteCount = sitemap.length;
 				setPoints();
-				loadTable();
+				requestData(0);
+				loadPages();
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 			    alert('error ' + textStatus + " " + errorThrown);
@@ -215,7 +227,6 @@
 	function setPoints() {
 		var markers = [];
 		for (var site in sitemap) {
-			console.log(sitemap[site]);
 			// var cityCircle = new google.maps.Circle({
 			// 	strokeColor: '#00FF00',
 			// 	strokeOpacity: 0.8,
@@ -264,16 +275,15 @@
 	}
 	//************************LOAD TABLE DATA******************************
 	function loadTable() {
-
 	    var tableBody = document.getElementById("tableBody");
+		while (tableBody.firstChild) {
+		    tableBody.removeChild(tableBody.firstChild);
+		}
 	    var tr = document.createElement("tr");
 	    var td = document.createElement("td");
 	    
 	    for (var siteData in sitemap) {
 	        var tr = document.createElement("tr");
-	        var td1 = document.createElement("td");
-	        td1.appendChild(document.createTextNode(sitemap[siteData].oid));
-	        tr.appendChild(td1);
 	        var td2 = document.createElement("td");
 	        td2.appendChild(document.createTextNode(sitemap[siteData].site_name));
 	        tr.appendChild(td2);
@@ -303,6 +313,63 @@
 	        tr.appendChild(td10);
 	        tableBody.appendChild(tr);
 	    }
+	}
+
+	function requestData(from)
+	{
+		$.ajax({
+			type: "GET",
+			url: 'http://localhost:8080/api/sites/' + from + '/' + limit,
+			dataType: 'json',
+	        success: function(data) {
+		    	sitemap = data;
+				loadTable();
+				document.getElementById("pages").value = (from/10)+1;
+	        },
+	        error: function(jqXHR, textStatus, errorThrown) {
+	            alert('error ' + textStatus + " " + errorThrown);
+	        }
+		});
+	}
+
+	function requestNext()
+	{
+		if(from < siteCount)
+		{
+			from = from + limit;
+			requestData(from);
+		}
+	}
+
+	function requestBack()
+	{
+		if(from > 0)
+		{
+			from = from - limit;
+			requestData(from);
+		}
+	}
+	function loadPages()
+	{
+		var numPages = siteCount/limit;
+		var selectPages = document.getElementById("pages");
+
+		while (selectPages.firstChild) {
+		    selectPages.removeChild(selectPages.firstChild);
+		}
+
+		for(var i = 1; i<numPages;i++)
+		{
+	    	var option = document.createElement("option");
+	    	option.setAttribute("value", i);
+	    	option.appendChild(document.createTextNode(i));
+	    	selectPages.appendChild(option);
+		}
+	}
+
+	document.getElementById("pages").onchange = function() {
+		from = (this.value - 1) * 10;
+		requestData(from);
 	}
 	</script>
 	<!-- Latest compiled and minified JavaScript -->

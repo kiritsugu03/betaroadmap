@@ -38,13 +38,28 @@ router.get('/', function(req, res) {
 // more routes for our API will happen here
 // ----------------------------------------------------
 
-var query = site.find()
-    .select('_id site_name site_id operator software_release technology site_type controller_id position operating_bands site_layouts');
-
 router.route('/sites')
     .get(function(req, res) {
+        var query = site.find().select('_id position');
         query.exec(function(err, sites) {
         console.log('getting all sites');
+            if (err){
+                console.log('error');
+                res.send(err);
+            }
+            res.json(sites);
+            console.log('Done');
+        });
+    });
+
+router.route('/sites/:from/:limit')
+    .get(function(req, res) {
+        var query = site.find()
+            .select('_id site_name site_id operator software_release technology site_type controller_id operating_bands site_layouts')
+            .limit(req.params.limit)
+            .skip(req.params.from);
+        query.exec(function(err, sites) {
+        console.log('getting ', req.params.limit, ' sites');
             if (err){
                 console.log('error');
                 res.send(err);
