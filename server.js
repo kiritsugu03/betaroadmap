@@ -40,7 +40,7 @@ router.get('/', function(req, res) {
 
 router.route('/sites')
     .get(function(req, res) {
-        var query = site.find().select('_id position');
+        var query = site.find().select('_id position operator site_name site_type technology');
         query.exec(function(err, sites) {
         console.log('getting all sites');
             if (err){
@@ -55,7 +55,7 @@ router.route('/sites')
 router.route('/sites/:from/:limit')
     .get(function(req, res) {
         var query = site.find()
-            .select('_id site_name site_id operator software_release technology site_type controller_id operating_bands site_layouts')
+            .select('_id site_name site_id operator software_release technology position site_type controller_id operating_bands site_layouts')
             .limit(req.params.limit)
             .skip(req.params.from);
         query.exec(function(err, sites) {
