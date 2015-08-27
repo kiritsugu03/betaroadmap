@@ -64,14 +64,31 @@
 		bottom: 0;
 	    width: 100%;
 	    height: 100px;
-	    z-index: 1;
-	    -webkit-transition: width 2s; /* For Safari 3.1 to 6.0 */
-	    transition: height 3s;
+	    z-index: 1;		
+	    -webkit-transition: height .5s; /* For Safari 3.1 to 6.0 */
+	    transition: height .5s;
 	}
-	#table-data:hover {
-	    height: 400px;
+	#pages {
+		display:block;
+		float:right;
+		padding:5px;
+	}
+	.btn-primary {
+		background-color: grey;
 	}
 	</style>
+	<script>
+		$(document).ready(function(){
+			$('#table-data').click(function(){
+				if($('#table-data').height() == 100) {
+					$('#table-data').height(400);
+				}
+				else {
+					$('#table-data').height(100);
+				}
+			});
+		});
+	</script>
 </head>
 
 <body>
@@ -81,11 +98,14 @@
 	<div id="table-data" class="container on-top" style="overflow-y: auto">
 		<select id="pages">
 		</select>
-		<a href="javascript:void(0)" onClick="requestNext()">
-			NEXT
-		</a>
+		<a href="javascript:void(0)" onclick="requestNext()">
+			<button type="button" class="btn btn-primary" aria-pressed="false" autocomplete="off">
+				NEXT
+			</button></a>
 		<a href="javascript:void(0)" onClick="requestBack()">
-			BACK
+			<button type="button" class="btn btn-primary" aria-pressed="false" autocomplete="off">
+				BACK
+			</button></a>
 		</a>
 		<table class="table">
 			<thead>
