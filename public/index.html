@@ -209,7 +209,8 @@
 					map: map,
 					icon: icon,
 					title: place.name,
-					position: place.geometry.location
+					position: place.geometry.location,
+					visible: false
 				}));
 
 				if (place.geometry.viewport) {
@@ -235,7 +236,7 @@
 				title: 'Site Name: '+ sitemap[site].site_name,
 				content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
 				sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
-				icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/blue_dot.png"
+				icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/red_dot.png"
 			});
 
 			var bounds = new google.maps.LatLngBounds();
