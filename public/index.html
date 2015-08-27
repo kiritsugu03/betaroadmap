@@ -6,109 +6,38 @@
 	<title>Roadmap</title>
 	<meta name="viewport" content="initial-scale=1.0">
 	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="css/bootstrap-combined.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="css/index.css"></script>
+	<script src="js/jquery-2.1.1.min.js"></script>
 	<script src="js/markerclusterer_compiled.js"></script>
-	<style type="text/css">
-	/*custom CSS here*/
-	html, body {
-		height: 100%;
-		margin: 0;
-		padding: 0;
-	}
-	#map {
-		height: 100%;
-	}
-	.controls {
-		margin-top: 10px;
-		border: 1px solid transparent;
-		border-radius: 2px 0 0 2px;
-		box-sizing: border-box;
-		-moz-box-sizing: border-box;
-		height: 32px;
-		outline: none;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-	}
-	#pac-input {
-		background-color: #fff;
-		font-family: Roboto;
-		font-size: 15px;
-		font-weight: 300;
-		margin-left: 12px;
-		padding: 0 11px 0 13px;
-		text-overflow: ellipsis;
-		width: 300px;
-	}
-	#pac-input:focus {
-	  border-color: #4d90fe;
-	}
-	.pac-container {
-	  font-family: Roboto;
-	}
-	#type-selector {
-	  color: #fff;
-	  background-color: #4d90fe;
-	  padding: 5px 11px 0px 11px;
-	}
-	#type-selector label {
-	  font-family: Roboto;
-	  font-size: 13px;
-	  font-weight: 300;
-	}
-	#table-data {
-		background-color: white;
-		border-radius: 10px;
-		position: absolute;
-		bottom: 0;
-	    width: 100%;
-	    height: 100px;
-	    z-index: 1;		
-	    -webkit-transition: height .5s; /* For Safari 3.1 to 6.0 */
-	    transition: height .5s;
-	}
-	#pages {
-		display:block;
-		float:right;
-		padding:5px;
-	}
-	.btn-primary {
-		background-color: grey;
-	}
-	</style>
-	<script>
-		$(document).ready(function(){
-			$('#table-data').click(function(){
-				if($('#table-data').height() == 100) {
-					$('#table-data').height(400);
-				}
-				else {
-					$('#table-data').height(100);
-				}
-			});
-		});
-	</script>
 </head>
 
 <body>
 	<input id="pac-input" class="controls" type="text" placeholder="Search Box">
+	<div id="type-selector" class="controls">
+      <input type="radio" name="type" id="changetype-all" checked="checked">
+      <label for="changetype-all">All</label>
+
+      <input type="radio" name="type" id="changetype-establishment">
+      <label for="changetype-establishment">Establishments</label>
+
+      <input type="radio" name="type" id="changetype-address">
+      <label for="changetype-address">Addresses</label>
+
+      <input type="radio" name="type" id="changetype-geocode">
+      <label for="changetype-geocode">Geocodes</label>
+    </div>
+ 
     <div id="map"></div>
 
-	<div id="table-data" class="container on-top" style="overflow-y: auto">
-		<select id="pages">
-		</select>
-		<a href="javascript:void(0)" onclick="requestNext()">
-			<button type="button" class="btn btn-primary" aria-pressed="false" autocomplete="off">
-				NEXT
-			</button></a>
-		<a href="javascript:void(0)" onClick="requestBack()">
-			<button type="button" class="btn btn-primary" aria-pressed="false" autocomplete="off">
-				BACK
-			</button></a>
-		</a>
+	<div id="table-data" class="container" >
+		<div id="div-page">
+		</div> 
 		<table class="table">
-			<thead>
+			<thead class="well">
 				<tr>
 					<th>site name</th>
 					<th>site id</th>
@@ -121,274 +50,14 @@
 					<th>site layouts</th>
 				</tr>
 			</thead>
-			<tbody class="table" id="tableBody">
+			<tbody id="tableBody">
 			</tbody>
 		</table>
-	<button type="button" class="btn btn-default btn-md">
-		<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-	</button>
-	<button type="button" class="btn btn-default btn-md">
-		<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-	</button>
  	</div>
 	<script src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initMap" async defer></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-	<script src="js/markerclusterer_compiled.js"></script>		
-	<script>
-	var sitemap;
-	var map;
-	var siteCount;
-	var from = 0;
-	var limit = 10;
-
-	function initMap() {
-		$.ajax({
-			type: "GET",
-			url: 'http://localhost:8080/api/sites',
-			dataType: 'json',
-			success: function(data) {
-				sitemap = data;
-			    siteCount = sitemap.length;
-				setPoints();
-				requestData(0);
-				loadPages();
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-			    alert('error ' + textStatus + " " + errorThrown);
-			}
-		});
-		var myLatLng = {lat: 14.655663, lng: 121.0607978};
-		var bounds = new google.maps.LatLngBounds();
-
-		map = new google.maps.Map(document.getElementById('map'), {
-			center: myLatLng,
-			zoom: 13,
-			mapTypeId: google.maps.MapTypeId.ROADMAP,
-			mapTypeControl: true,
-			mapTypeControlOptions: {
-			    style: google.maps.MapTypeControlStyle.TOP_RIGHT,
-			    position: google.maps.ControlPosition.TOP_RIGHT
-			},
-			zoomControl: true,
-			    zoomControlOptions: {
-			        style: google.maps.ZoomControlStyle.LARGE,
-			        position: google.maps.ControlPosition.RIGHT_CENTER
-			    },
-			panControl: true,
-			panControlOptions: {
-			        style: google.maps.ZoomControlStyle.LARGE,
-			        position: google.maps.ControlPosition.RIGHT_CENTER
-			    },
-			scaleControl: true,
-			streetViewControl: true,
-			streetViewControlOptions: {
-			    position: google.maps.ControlPosition.LEFT_TOP
-			},
-			streetViewControl:false
-		});
-		// Create the search box and link it to the UI element.
-		var input = document.getElementById('pac-input');
-		var searchBox = new google.maps.places.SearchBox(input);
-		map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-		// Bias the SearchBox results towards current map's viewport.
-		map.addListener('bounds_changed', function() {
-			searchBox.setBounds(map.getBounds());
-		});
-
-		var markers = [];
-		// [START region_getplaces]
-		// Listen for the event fired when the user selects a prediction and retrieve
-		// more details for that place.
-		searchBox.addListener('places_changed', function() {
-			var places = searchBox.getPlaces();
-
-			if (places.length == 0) {
-				return;
-			}
-
-			// Clear out the old markers.
-			markers.forEach(function(marker) {
-				marker.setMap(null);
-			});
-			markers = [];
-
-			// For each place, get the icon, name and location.
-			var bounds = new google.maps.LatLngBounds();
-			places.forEach(function(place) {
-				var icon = {
-				url: place.icon,
-				size: new google.maps.Size(71, 71),
-				origin: new google.maps.Point(0, 0),
-				anchor: new google.maps.Point(17, 34),
-				scaledSize: new google.maps.Size(25, 25)
-				};
-
-				// Create a marker for each place.
-				markers.push(new google.maps.Marker({
-					map: map,
-					icon: icon,
-					title: place.name,
-					position: place.geometry.location,
-					visible: false
-				}));
-
-				if (place.geometry.viewport) {
-					// Only geocodes have viewport.
-					bounds.union(place.geometry.viewport);
-				} else {
-					bounds.extend(place.geometry.location);
-				}
-			});
-			map.fitBounds(bounds);
-		});
-		// [END region_getplaces]
-	}
-	function setPoints() {
-		var markers = [];
-		for (var site in sitemap) {
-
-			var marker = new google.maps.Marker({
-				position: {
-					lat: sitemap[site].position.latitude,
-					lng: sitemap[site].position.longitude
-				},
-				title: 'Site Name: '+ sitemap[site].site_name,
-				content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
-				sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
-				icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/red_dot.png"
-			});
-
-			var bounds = new google.maps.LatLngBounds();
-			bounds.extend(marker.position);
-
-			google.maps.event.addListener(marker, 'click', (function(marker, i) {
-				return function() {
-				  	map.setZoom(18);
-					map.setCenter(marker.getPosition());
-
-					var contentString = marker.title + '<br/>' + marker.content;
-					var infowindow = new google.maps.InfoWindow({
-						content: contentString
-					});
-					infowindow.open(map, marker);
-				}
-			})(marker, site));
-			markers.push(marker);
-		} 
-		var mcOptions = {gridSize: 50, maxZoom: 15};
-		var markerCluster = new MarkerClusterer(map, markers, mcOptions);
-	}
-
-	function requestData(from)
-	{
-		$.ajax({
-			type: "GET",
-			url: 'http://localhost:8080/api/sites/' + from + '/' + limit,
-			dataType: 'json',
-	        success: function(data) {
-		    	sitemap = data;
-				loadTable();
-				document.getElementById("pages").value = (from/10)+1;
-	        },
-	        error: function(jqXHR, textStatus, errorThrown) {
-	            alert('error ' + textStatus + " " + errorThrown);
-	        }
-		});
-	}
-
-
-	function loadTable() {
-	    var tableBody = document.getElementById("tableBody");
-		while (tableBody.firstChild) {
-		    tableBody.removeChild(tableBody.firstChild);
-		}
-	    var tr = document.createElement("tr");
-	    var td = document.createElement("td");
-	    
-	    for (var siteData in sitemap) {
-	        var tr = document.createElement("tr");
-	        var a = document.createElement("a");
-	        a.setAttribute('onclick', 'updateMapCenter(' + sitemap[siteData].position.latitude  + ', ' + sitemap[siteData].position.longitude +')');
-	        a.setAttribute('href', '#');
-	        var td2 = document.createElement("td");
-	        td2.appendChild(document.createTextNode(sitemap[siteData].site_name));
-	        a.appendChild(td2);
-	        tr.appendChild(a);
-	        var td3 = document.createElement("td");
-	        td3.appendChild(document.createTextNode(sitemap[siteData].site_id));
-	        tr.appendChild(td3);
-	        var td4 = document.createElement("td");
-	        td4.appendChild(document.createTextNode(sitemap[siteData].operator));
-	        tr.appendChild(td4);
-	        var td5 = document.createElement("td");
-	        td5.appendChild(document.createTextNode(sitemap[siteData].software_release));
-	        tr.appendChild(td5);
-	        var td6 = document.createElement("td");
-	        td6.appendChild(document.createTextNode(sitemap[siteData].technology));
-	        tr.appendChild(td6);
-	        var td7 = document.createElement("td");
-	        td7.appendChild(document.createTextNode(sitemap[siteData].site_type));
-	        tr.appendChild(td7);
-	        var td8 = document.createElement("td");
-	        td8.appendChild(document.createTextNode(sitemap[siteData].controller_id));
-	        tr.appendChild(td8);
-	        var td9 = document.createElement("td");
-	        td9.appendChild(document.createTextNode(sitemap[siteData].operating_bands));
-	        tr.appendChild(td9);
-	        var td10 = document.createElement("td");
-	        td10.appendChild(document.createTextNode(sitemap[siteData].site_layouts));
-	        tr.appendChild(td10);
-	        tableBody.appendChild(tr);
-	    }
-	}
-
-
-
-	function requestNext()
-	{
-		if(from < siteCount)
-		{
-			from = from + limit;
-			requestData(from);
-		}
-	}
-
-	function requestBack()
-	{
-		if(from > 0)
-		{
-			from = from - limit;
-			requestData(from);
-		}
-	}
-	function loadPages()
-	{
-		var numPages = siteCount/limit;
-		var selectPages = document.getElementById("pages");
-
-		while (selectPages.firstChild) {
-		    selectPages.removeChild(selectPages.firstChild);
-		}
-
-		for(var i = 1; i<numPages;i++)
-		{
-	    	var option = document.createElement("option");
-	    	option.setAttribute("value", i);
-	    	option.appendChild(document.createTextNode(i));
-	    	selectPages.appendChild(option);
-		}
-	}
-
-	document.getElementById("pages").onchange = function() {
-		from = (this.value - 1) * 10;
-		requestData(from);
-	}
-	
-	function updateMapCenter (latitude, longitude) {
-  		map.setCenter({lat:latitude, lng:longitude});
-  		map.setZoom(18);
-	} 
-	</script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/markerclusterer_compiled.js"></script>
+    <script src="js/bootstrap-paginator.min.js"></script>
+	<script src="js/index.js"></script>
 </body>	
 </html>

@@ -69,13 +69,16 @@ router.route('/sites/:from/:limit')
         });
     });
 
-router.route('/sites/:_id')
+router.route('/sites/:siteName')
     .get(function(req, res) {
-        site.findById(req.params._id, function(err, siteInfo) {
-        console.log('getting site with id ',req.params._id);
-            if (err)
+        var query = site.find().select('position');
+        query.exec(function(err, sites) {
+        console.log('getting site with site name', req.params.siteName);
+            if (err){
+                console.log('error');
                 res.send(err);
-            res.json(siteInfo);
+            }
+            res.json(sites);
             console.log('Done');
         });
     });

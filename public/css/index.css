@@ -1,0 +1,119 @@
+/*custom CSS here*/
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    body
+    {
+        overflow: hidden;
+    }
+    #map {
+        height: 100%;
+    }
+    .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+    #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+    }
+    #pac-input:focus {
+      border-color: #4d90fe;
+    }
+    .pac-container {
+      font-family: Roboto;
+    }
+    #type-selector {
+      color: #fff;
+      background-color: #4d90fe;
+      padding: 5px 11px 0px 11px;
+    }
+    #type-selector label {
+      font-family: Roboto;
+      font-size: 13px;
+      font-weight: 300;
+    }
+    #table-data {
+        background-color: white;
+        border-radius: 10px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 100px;
+        z-index: 1;
+        -webkit-transition: height .5s; /* For Safari 3.1 to 6.0 */
+        transition: height .5s;
+    }
+    #div-page
+    {
+        width: 100%;
+        position: relative;
+        background-color: #ffffff;
+    }
+    table {
+        border-bottom: 1px solid rgb(221,221,221);
+    }
+    tbody {
+        display:block;
+        height:27vh;
+        overflow:auto;
+    }
+    thead, tbody tr {
+        display:table;
+        width:100%;
+        table-layout:fixed;/* even columns width , fix width of table too*/
+    }
+    thead {
+        width: calc( 100% - 1em )/* scrollbar is average 1em/16px width, remove it from thead width */
+    }
+    .well
+    {
+        margin-bottom: 0px;
+    }
+    #button-search
+    {
+        background-color: white;
+        font-family: Roboto;
+    }
+    #goCenterUI {
+      background-color: rgb(77,144,254);
+      border: 2px solid rgb(77,144,254);
+      border-radius: 0px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.3);
+      cursor: pointer;
+      float: left;
+      margin-bottom: 25px;
+      text-align: center;
+      margin-right: -12px;
+    }
+    #goCenterUI:active {
+       border-top-color: #4897ff;
+        background: #4897ff;
+       }
+    #goCenterUI:hover {
+       border-top-color: #4897ff;
+        background: #4897ff;
+       color: #ccc;
+       }
+    #goCenterText{
+      color: white;
+      font-family: Roboto,Arial,sans-serif;
+      font-size: 13px;
+      line-height: 28px;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
