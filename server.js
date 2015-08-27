@@ -71,7 +71,7 @@ router.route('/sites/:from/:limit')
 
 router.route('/sites/:siteName')
     .get(function(req, res) {
-        var query = site.find().select('position');
+        var query = site.find().select('position').where('site_name').equals(req.params.siteName);
         query.exec(function(err, sites) {
         console.log('getting site with site name', req.params.siteName);
             if (err){

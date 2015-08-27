@@ -6,7 +6,7 @@ var limit = 10;
 
 $(document).ready(function(){
     $('#table-data').click(function(){
-        if(event.target == $('#div-page')[0]) {
+        if(event.target == $('#table-data')[0]) {
             if($('#table-data').height() == 100) {
                 $('#table-data').height(400);
             }
@@ -173,57 +173,37 @@ function setPoints() {
     var markers = [];
     for (var site in sitemap) {
 
-			var marker = new google.maps.Marker({
-				position: {
-					lat: sitemap[site].position.latitude,
-					lng: sitemap[site].position.longitude
-				},
-				title: 'Site Name: '+ sitemap[site].site_name,
-				content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
-				sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
-				icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/red_dot.png"
-			});
-			var siteRadius = sitemap[site].position.coordinates_source.radius;
-			
-			var bounds = new google.maps.LatLngBounds();
-			bounds.extend(marker.position);
-			var siteCircle;
-			var circles = [];
-			google.maps.event.addListener(marker, 'click', (function(marker, siteRadius, i) {
-				return function() {
-				  	map.setZoom(16);
-					map.setCenter(marker.getPosition());
+        var marker = new google.maps.Marker({
+            position: {
+                lat: sitemap[site].position.latitude,
+                lng: sitemap[site].position.longitude
+            },
+            title: 'Site Name: '+ sitemap[site].site_name,
+            content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
+            sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
+            icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/blue_dot.png"
+        });
 
-					var contentString = marker.title + '<br/>' + marker.content;
-					var infowindow = new google.maps.InfoWindow({
-						content: contentString
-					});
-					infowindow.open(map, marker);
-					clearCircles()
-					siteCircle = new google.maps.Circle({
-					strokeColor: '#00FF00',
-					strokeOpacity: 0.8,
-					strokeWeight: 2,
-					fillColor: '#00FF00',
-					fillOpacity: 0.10,
-					map: map,
-					center: marker.position,
-					radius: Number(siteRadius)
-					
-					});
-					circles.push(siteCircle);
-				}
-			})(marker, site));
-			markers.push(marker);
-		} 
-		function clearCircles(){
-            for (var i = 0; i < circles.length; i++) {
-                circles[i].setVisible(false);
+        var bounds = new google.maps.LatLngBounds();
+        bounds.extend(marker.position);
+
+        google.maps.event.addListener(marker, 'click', (function(marker, i) {
+            return function() {
+                map.setZoom(18);
+                map.setCenter(marker.getPosition());
+
+                var contentString = marker.title + '<br/>' + marker.content;
+                var infowindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+                infowindow.open(map, marker);
             }
-        }
-		var mcOptions = {gridSize: 50, maxZoom: 15};
-		var markerCluster = new MarkerClusterer(map, markers, mcOptions);
-	}
+        })(marker, site));
+        markers.push(marker);
+    } 
+    var mcOptions = {gridSize: 50, maxZoom: 15};
+    var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+}
 
 function requestData(from_)
 {
@@ -308,4 +288,19 @@ function loadPages()
 function updateMapCenter (latitude, longitude) {
     map.setCenter({lat:latitude, lng:longitude});
     map.setZoom(18);
-} 
+}
+
+function searchSiteName()
+{
+    $.ajax({
+        type: "GET",
+        url: 'http://localhost:8080/api/sites/' + $('#searchSite').val(),
+        dataType: 'json',
+        success: function(data) {
+          updateMapCenter(data[0].position.latitude, data[0].position.longitude);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert('error ' + textStatus + " " + errorThrown);
+        }
+    });
+}
