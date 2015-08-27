@@ -173,37 +173,57 @@ function setPoints() {
     var markers = [];
     for (var site in sitemap) {
 
-        var marker = new google.maps.Marker({
-            position: {
-                lat: sitemap[site].position.latitude,
-                lng: sitemap[site].position.longitude
-            },
-            title: 'Site Name: '+ sitemap[site].site_name,
-            content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
-            sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
-            icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/blue_dot.png"
-        });
+			var marker = new google.maps.Marker({
+				position: {
+					lat: sitemap[site].position.latitude,
+					lng: sitemap[site].position.longitude
+				},
+				title: 'Site Name: '+ sitemap[site].site_name,
+				content: 'Site Operator: ' + sitemap[site].operator + '<br/>' + 'Site Type: ' +
+				sitemap[site].site_type + '<br/>' + 'Technology: ' + sitemap[site].technology,
+				icon: "https://www.google.com/support/enterprise/static/geo/cdate/art/dots/red_dot.png"
+			});
+			var siteRadius = sitemap[site].position.coordinates_source.radius;
+			
+			var bounds = new google.maps.LatLngBounds();
+			bounds.extend(marker.position);
+			var siteCircle;
+			var circles = [];
+			google.maps.event.addListener(marker, 'click', (function(marker, siteRadius, i) {
+				return function() {
+				  	map.setZoom(16);
+					map.setCenter(marker.getPosition());
 
-        var bounds = new google.maps.LatLngBounds();
-        bounds.extend(marker.position);
-
-        google.maps.event.addListener(marker, 'click', (function(marker, i) {
-            return function() {
-                map.setZoom(18);
-                map.setCenter(marker.getPosition());
-
-                var contentString = marker.title + '<br/>' + marker.content;
-                var infowindow = new google.maps.InfoWindow({
-                    content: contentString
-                });
-                infowindow.open(map, marker);
+					var contentString = marker.title + '<br/>' + marker.content;
+					var infowindow = new google.maps.InfoWindow({
+						content: contentString
+					});
+					infowindow.open(map, marker);
+					clearCircles()
+					siteCircle = new google.maps.Circle({
+					strokeColor: '#00FF00',
+					strokeOpacity: 0.8,
+					strokeWeight: 2,
+					fillColor: '#00FF00',
+					fillOpacity: 0.10,
+					map: map,
+					center: marker.position,
+					radius: Number(siteRadius)
+					
+					});
+					circles.push(siteCircle);
+				}
+			})(marker, site));
+			markers.push(marker);
+		} 
+		function clearCircles(){
+            for (var i = 0; i < circles.length; i++) {
+                circles[i].setVisible(false);
             }
-        })(marker, site));
-        markers.push(marker);
-    } 
-    var mcOptions = {gridSize: 50, maxZoom: 15};
-    var markerCluster = new MarkerClusterer(map, markers, mcOptions);
-}
+        }
+		var mcOptions = {gridSize: 50, maxZoom: 15};
+		var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+	}
 
 function requestData(from_)
 {
